@@ -1,0 +1,72 @@
+public class Cat {
+    private String name = "Барсик";
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+------------------------------------------------------------------------------------------------------------------------
+public class Dog {
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+------------------------------------------------------------------------------------------------------------------------
+public class Parrot {
+    private String name = "Кеша";
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+------------------------------------------------------------------------------------------------------------------------
+@Configuration
+public class Config_example {
+
+    @Bean
+    public Cat getCat(Parrot parrot){
+        Cat cat = new Cat();
+        cat.setName(parrot.getName() + " -killer");
+        return cat;
+    }
+
+    @Bean(name="dog")
+    public Dog getDog(){
+        return new Dog();
+    }
+
+    @Bean(name = "parrot-kesha")
+    public Parrot getdfadfadfa(){
+        return new Parrot();
+    }
+}
+------------------------------------------------------------------------------------------------------------------------
+public class Test {
+    public static void main(String[] args) {
+//        ApplicationContext context = new AnnotationConfigApplicationContext("com.lesson4");
+//        ApplicationContext context = new AnnotationConfigApplicationContext("com.lesson4.config");
+        ApplicationContext context = new AnnotationConfigApplicationContext(Config_example.class);
+
+        Cat cat=context.getBean(Cat.class);
+        Dog dog=(Dog) context.getBean("dog");
+        Parrot parrot=context.getBean("parrot-kesha",Parrot.class);
+
+        System.out.println(cat.getName());
+        System.out.println(dog.getName());
+        System.out.println(parrot.getName());
+    }
+}
