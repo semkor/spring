@@ -3,11 +3,12 @@ package com.lesson2.hw2;
 import javax.persistence.*;
 import java.util.Date;
 
+
 @Entity
 @Table(name="ITEM")
 public class Item {
     private long id;
-    private String names;
+    private String name;
     private Date dateCreated;
     private Date lastUpdatedDate;
     private String description;
@@ -15,9 +16,9 @@ public class Item {
     public Item() {
     }
 
-    public Item(long id, String names, Date dateCreated, Date lastUpdatedDate, String description) {
+    public Item(long id, String name, Date dateCreated, Date lastUpdatedDate, String description) {
         this.id = id;
-        this.names = names;
+        this.name = name;
         this.dateCreated = dateCreated;
         this.lastUpdatedDate = lastUpdatedDate;
         this.description = description;
@@ -31,8 +32,8 @@ public class Item {
     }
 
     @Column (name = "NAME")
-    public String getNames() {
-        return names;
+    public String getName() {
+        return name;
     }
 
     @Column (name = "DATE_CREATED")
@@ -55,8 +56,8 @@ public class Item {
         this.id = id;
     }
 
-    public void setNames(String name) {
-        this.names = names;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setDateCreated(Date dateCreated) {
@@ -75,7 +76,7 @@ public class Item {
     public String toString() {
         return "Item{" +
                 "id=" + id +
-                ", names='" + names + '\'' +
+                ", names='" + name + '\'' +
                 ", dateCreated=" + dateCreated +
                 ", lastUpdatedDate=" + lastUpdatedDate +
                 ", description='" + description + '\'' +
