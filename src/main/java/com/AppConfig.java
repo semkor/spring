@@ -1,15 +1,12 @@
 package com;
 
-import com.lesson2.OrderDAO;
-import com.lesson2.OrderService;
-import com.lesson2.hw1.Route;
-import com.lesson2.hw1.Service;
-import com.lesson2.hw1.Step;
-import com.lesson2.hw2.ItemDAO;
-import com.lesson2.hw2.ItemService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -17,37 +14,34 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
+import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import javax.persistence.EntityManagerFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.Properties;
+
 
 @Configuration
 @ComponentScan("com")
+@PropertySource("classpath:sqlExecute.properties")
+@EnableWebMvc
 @EnableTransactionManagement
-public class AppConfig {
+public class AppConfig implements WebMvcConfigurer {
 
-    @Bean //для создания при работе с entityManager - связка Spring - Hibernate
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(){
-        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-            em.setDataSource(dataSource());
-            em.setPackagesToScan(new String[]{"com"});                      //где будет искать
-
-        JpaVendorAdapter vendorAdapter=new HibernateJpaVendorAdapter();     //можем проставлять property
-        em.setJpaVendorAdapter(vendorAdapter);
-        //  em.setJpaProperties(additionalProperties());
-        return em;
+    @Override
+    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
     }
 
-//        Properties additionalProperties(){
-//        Properties properties=new Properties();
-//        properties.setProperty("hibernate.dialect","org.hibernate.dialect.Oracle10gDialect");
-//        return properties;
-//    }
+    //----------------------------- подключение Hibernate ---------------------------------------------
 
-    @Bean   //ccылка на БД
+    @Bean   // ccылка на БД  - cоздает связь  с  БД
     public DriverManagerDataSource dataSource(){
-            DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
             dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
             dataSource.setUrl("jdbc:mysql://database-1.c0nqcnerv9wp.us-east-1.rds.amazonaws.com:3306/database_name");
             dataSource.setUsername("maven");
@@ -55,59 +49,68 @@ public class AppConfig {
         return dataSource;
     }
 
-//    @Bean
-//    public PersistenceExceptionTranslationPostProcessor exceptionTranslation(){
-//        return new PersistenceExceptionTranslationPostProcessor();
-//    }
 
-//-------------------------------стандартные - работает с транзакциями ---------------------------------
+    @Bean //для создания при работе с entityManager - связка Spring - Hibernate
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(){
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+            em.setDataSource(dataSource());
+            em.setPackagesToScan(new String[]{"com"});                      //где будет искать
+        JpaVendorAdapter vendorAdapter=new HibernateJpaVendorAdapter();     //можем проставлять property
+            em.setJpaVendorAdapter(vendorAdapter);
+            em.setJpaProperties(additionalProperties());
+        return em;
+    }
+
+        Properties additionalProperties(){
+            Properties properties=new Properties();
+                properties.setProperty("hibernate.dialect","org.hibernate.dialect.MySQL5Dialect");
+//                properties.setProperty("hibernate.show_sql", "true");
+                properties.setProperty("hibernate.enable_lazy_load_no_trans", "true");
+        return properties;
+    }
+
+    //----------------------------- работа с транзакциями ---------------------------------------------
     @Bean
     public PlatformTransactionManager transactionManager(EntityManagerFactory emf){
         JpaTransactionManager transactionManager=new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(emf);
+            transactionManager.setEntityManagerFactory(emf);
         return transactionManager;
     }
 
-
-//--------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------  данные из lesson4.hw2 ------------------------------------------------
-    @Bean (name = "orderService")
-    public OrderService getOrderService(){
-        return new OrderService();
+    @Bean
+    public PersistenceExceptionTranslationPostProcessor exceptionTranslation(){
+        return new PersistenceExceptionTranslationPostProcessor();
     }
 
-    @Bean (name = "orderDAO")
-    public OrderDAO getOrderDAO(){
-        return new OrderDAO();
-    }
-    //-----------------------------------------------------------------------------------------------------
-    @Bean (name = "service")
-    public Service getService(){
-        List<String> params=new ArrayList<>();
-        params.add("one");
-        return new Service(1,"some",params);
+    //------------------------------ работа с thymeleaf ---------------------------------------------
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    public AppConfig(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
-    @Bean (name = "step")
-    public Step getStep(){
-        return new Step(1, getService(), getService(), new TreeMap<>(),new TreeMap<>());
+    @Bean
+    public SpringResourceTemplateResolver templateResolver(){
+        SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
+            templateResolver.setApplicationContext(applicationContext);
+            templateResolver.setPrefix("classpath:/views/");
+            templateResolver.setSuffix(".html");
+        return templateResolver;
     }
 
-    @Bean (name = "route")
-    public Route getRoute(){
-        List<Step> listStep=new ArrayList<>();
-        listStep.add(getStep());
-        return new Route("1",  listStep);
+    @Bean
+    public SpringTemplateEngine templateEngine(){
+        SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+            templateEngine.setTemplateResolver(templateResolver());
+            templateEngine.setEnableSpringELCompiler(true);
+        return templateEngine;
     }
 
-    //-----------------------------------------------------------------------------------------------------
-    @Bean (name = "itemService")
-    public ItemService getItemService(){
-        return new ItemService();
-    }
-
-    @Bean (name = "itemDAO")
-    public ItemDAO getItemDAO(){
-        return new ItemDAO();
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry){
+        ThymeleafViewResolver resolver = new ThymeleafViewResolver();
+            resolver.setTemplateEngine(templateEngine());
+            registry.viewResolver(resolver);
     }
 }
