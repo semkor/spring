@@ -10,53 +10,82 @@ import com.lesson2.hw2.ItemService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
-//@Configuration
-//@ComponentScan("com")
-//@PropertySource("classpath:lesson.properties") - пример для указания фиксированных данных
-public class MyConfig {
-//
-//    @Bean (name = "orderService")
-//    public OrderService getOrderService(){
-//        return new OrderService();
-//    }
-//
-//    @Bean (name = "orderDAO")
-//    public OrderDAO getOrderDAO(){
-//        return new OrderDAO();
-//    }
-////-----------------------------------------------------------------------------------------------------
-//    @Bean (name = "service")
-//    public Service getService(){
-//        List<String> params=new ArrayList<>();
-//            params.add("one");
-//        return new Service(1,"some",params);
-//    }
-//
-//    @Bean (name = "step")
-//    public Step getStep(){
-//        return new Step(1, getService(), getService(), new TreeMap<>(),new TreeMap<>());
-//    }
-//
-//    @Bean (name = "route")
-//    public Route getRoute(){
-//        List<Step> listStep=new ArrayList<>();
-//            listStep.add(getStep());
-//        return new Route("1",  listStep);
-//    }
-//
-////-----------------------------------------------------------------------------------------------------
-//    @Bean (name = "itemService")
-//    public ItemService getItemService(){
-//        return new ItemService();
-//    }
-//
-//    @Bean (name = "itemDAO")
-//    public ItemDAO getItemDAO(){
-//        return new ItemDAO();
-//    }
+@Configuration
+@ComponentScan("com")
+@EnableWebMvc
+public class MyConfig implements WebMvcConfigurer {
+
+    @Override
+    public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+        configurer.enable();
+    }
+
+    //-----------------------------------------------------------------------------------------------------
+    @Bean (name = "orderService")
+    public OrderService getOrderService(){
+        return new OrderService();
+    }
+
+    @Bean (name = "orderDAO")
+    public OrderDAO getOrderDAO(){
+        return new OrderDAO();
+    }
+
+    //-----------------------------------------------------------------------------------------------------
+    @Bean (name = "service")
+    @Scope("prototype")
+    public Service getService(){
+        List<String> params=new ArrayList<>();
+            params.add("one");
+            params.add("two");
+            params.add("three");
+        return new Service(1,"ServiceMobile",params);
+    }
+
+    @Bean (name = "step")
+    @Scope("prototype")
+    public Step getStep(){
+        Map<String, String> paramServiceFrom = new HashMap<>();
+            paramServiceFrom.put("1","one");
+            paramServiceFrom.put("2","two");
+            paramServiceFrom.put("3","three");
+        Map<String, String> paramsServiceTo = new HashMap<>();
+            paramsServiceTo.put("1","caseb");
+            paramsServiceTo.put("2","caseb");
+            paramsServiceTo.put("3","caser");
+        return new Step(1,getService(),getService(), paramServiceFrom,paramsServiceTo);
+    }
+
+    @Bean (name = "route")
+    public Route getRoute(){
+        List<Step> listStep=new ArrayList<>();
+            listStep.add(getStep());
+            listStep.add(getStep());
+            listStep.add(getStep());
+        return new Route("3",  listStep);
+    }
+
+    //-----------------------------------------------------------------------------------------------------
+    @Bean (name = "itemService")
+    public ItemService getItemService(){
+        return new ItemService();
+    }
+
+    @Bean (name = "itemDAO")
+    public ItemDAO getItemDAO(){
+        return new ItemDAO();
+    }
 }
+
+
+
+
+
+
