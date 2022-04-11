@@ -1,12 +1,16 @@
 package com;
 
+
+import com.lesson7.hw.B00.conversion.DateFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -14,10 +18,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
@@ -37,7 +38,7 @@ public class AppConfig implements WebMvcConfigurer {
         configurer.enable();
     }
 
-    //----------------------------- подключение Hibernate ---------------------------------------------
+    //---------------------------------- подключение Hibernate ---------------------------------------------------------
 
     @Bean   // ccылка на БД  - cоздает связь  с  БД
     public DriverManagerDataSource dataSource(){
@@ -48,7 +49,6 @@ public class AppConfig implements WebMvcConfigurer {
             dataSource.setPassword("1291328diMA");
         return dataSource;
     }
-
 
     @Bean //для создания при работе с entityManager - связка Spring - Hibernate
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(){
@@ -96,6 +96,7 @@ public class AppConfig implements WebMvcConfigurer {
             templateResolver.setApplicationContext(applicationContext);
             templateResolver.setPrefix("classpath:/views/");
             templateResolver.setSuffix(".html");
+                templateResolver.setCharacterEncoding("UTF-8");
         return templateResolver;
     }
 
@@ -111,6 +112,33 @@ public class AppConfig implements WebMvcConfigurer {
     public void configureViewResolvers(ViewResolverRegistry registry){
         ThymeleafViewResolver resolver = new ThymeleafViewResolver();
             resolver.setTemplateEngine(templateEngine());
+                resolver.setCharacterEncoding("UTF-8");
             registry.viewResolver(resolver);
+    }
+    //---------------------------- дополнительные настройки  thymeleaf -----------------------------------------------
+
+    @Override
+    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
+        WebMvcConfigurer.super.addResourceHandlers(registry);
+            registry.addResourceHandler("/images/**").addResourceLocations("/images/");
+            registry.addResourceHandler("/css/**").addResourceLocations("/css/");
+    }
+
+    @Bean
+    public ResourceBundleMessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+            messageSource.setBasename("Messages");
+        return messageSource;
+    }
+
+    @Override
+    public void addFormatters(final FormatterRegistry registry) {
+        WebMvcConfigurer.super.addFormatters(registry);
+        registry.addFormatter(dateFormatter());
+    }
+
+    @Bean
+    public DateFormatter dateFormatter() {
+        return new DateFormatter();
     }
 }

@@ -1,7 +1,5 @@
 package com.lesson6.hw2.B1_model;
 
-import org.hibernate.annotations.Formula;
-
 import java.util.Date;
 
 public class Filter {

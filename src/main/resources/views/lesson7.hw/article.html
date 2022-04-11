@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Account</title>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+<div>
+    <img src="../../../webapp/images/stsmlogo.png" alt="STSM logo" title="STSM logo"
+         th:src="@{/images/stsmlogo.png}"/>
+</div>
+
+
+<p th:text = "${personFull.getLogin()}">VALUE</p>
+<form th:method="GET" th:action="@{/article}">
+    <input type="submit" value="Exit"/>
+</form>
+
+
+
+<br/>
+<form th:method="GET" th:action="@{/article/add/{id}(id=${personFull.getId()})}">
+    <button type="submit">add</button>
+</form>
+
+
+<div class="ArticleAccount">
+    <table>
+        <thead>
+        <tr>
+            <th th:text="#{th.date}">date</th>
+            <th th:text="#{th.category}">category</th>
+            <th th:text="#{th.subcategory}">subcategory</th>
+            <th th:text="#{th.city}">city</th>
+            <th th:text="#{th.name}">name</th>
+            <th th:text="#{th.context}">context</th>
+            <th th:text="#{th.price}">price</th>
+            <th th:text="#{th.currency}">currency</th>
+            <th th:text="#{th.telephone}">telephone</th>
+            </th>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sb : ${articleAccount}">
+            <td th:text="${#dates.format(sb.dateFrom, 'dd.MM.yyyy')}"> - </td>
+            <td th:text="${sb.category}"> - </td>
+            <td th:text="${sb.subcategory}"> - </td>
+            <td th:text="${sb.city}"> - </td>
+            <td th:text="${sb.articleName}"> - </td>
+            <td th:text="${sb.context}"> - </td>
+            <td th:text="${sb.price}"> - </td>
+            <td th:text="${sb.currencyPrice}"> - </td>
+            <td th:text="${sb.telephone}"> - </td>
+            <td>
+                <form th:method="GET" th:action="@{/article/update/{id}(id=${sb.getId()})}">
+                    <input type="submit" value ="Update"/>
+                </form>
+            </td>
+            <td>
+                <form th:method="DELETE" th:action="@{/article/del/{id}/{idPerson}(id=${sb.getId()}, idPerson=${personFull.getId()})}">
+                    <input type="submit" value="Delete"/>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

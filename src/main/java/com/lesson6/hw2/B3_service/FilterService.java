@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@Service
+@Service("filterSer")
 public class FilterService {
     private FlightService flightService;
     private PlaneService planeService;
