@@ -1,4 +1,4 @@
-package com;
+package com.config;
 
 
 import com.lesson7.hw.B00.conversion.DateFormatter;
